@@ -9,6 +9,7 @@ class Product
   include DataMapper::Resource
   property :id, Serial
   property :name, Text, :required => true
+  property :stock, Integer, :required => true, :default => 1
   property :created_at, DateTime
   
   def url
@@ -19,6 +20,7 @@ class Product
     { 
       'id' => self.id, 
       'name' => self.name,
+      'stock' => self.stock,
       'created_at'=> self.created_at
     }.to_json(*a)
   end
@@ -43,7 +45,10 @@ end
 
 get '/product/:id' do
   content_type 'application/json'
-  { 'content' => Product.get(params[:id]) }.to_json
+  product = Product.get(params[:id]) rescue nil
+  halt(404, 'Not found') if product.nil?
+  
+  { 'content' => product }.to_json
 end
 
 get '/' do
@@ -55,6 +60,15 @@ end
 get '/new/:name' do
   n = Product.new
   n.name = params[:name]
+  n.created_at = Time.now
+  n.save
+  redirect '/'
+end
+
+get '/new/:name/:stock' do
+  n = Product.new
+  n.name = params[:name]
+  n.stock = params[:stock]
   n.created_at = Time.now
   n.save
   redirect '/'
