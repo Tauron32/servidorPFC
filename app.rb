@@ -12,16 +12,17 @@ end
 DataMapper.finalize.auto_upgrade!
 
 get '/' do
-  @products = Product.all :order => :id.desc
+  @products = Product.all :order => :id.asc
+  @title = "All products"
   erb :home
 end
 
-post '/new/:name' do
+get '/new/:name' do
   n = Product.new
   n.name = params[:name]
   n.created_at = Time.now
   n.save
-  
+  redirect '/'
 end
 
 get '/product/:id' do
